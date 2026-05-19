@@ -4,7 +4,7 @@
 #include <reg52.h>
 #include <intrins.h>
 
-// 引脚定义，可根据实际接线修改
+// 引脚定义
 sbit adc_CS   = P3^5;
 sbit adc_DCLK = P3^6;
 sbit adc_DIN  = P3^4;

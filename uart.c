@@ -1,6 +1,6 @@
 #include "uart.h"
 #include <string.h>
-#include <stdlib.h>   // 提供 atoi()
+#include <stdlib.h>  
 #include "wave.h"
 
 #define RECV_BUF_SIZE 32
@@ -11,7 +11,7 @@ static unsigned char recv_idx = 0;
 
 // 全局变量定义（与 config.h 中的 extern 对应）
 unsigned int Value = 100;   // 默认初始值
-bit ackRequired = 0;   // 需要发送确认信息
+bit ackRequired = 0;   			// 修改Value确认信息
 bit waveUpdateReq = 0;      // 方波参数更新请求标志
 
 /**
@@ -37,12 +37,7 @@ void UART_Init(unsigned int baud)
         TL1 = 0xFD;
         PCON |= 0x80;   // SMOD = 1
     }
-    else if (baud == BAUD_57600)
-    {
-        TH1 = 0xFF;
-        TL1 = 0xFF;
-        PCON |= 0x80;   // SMOD = 1, 实际波特率 = 57600
-    }
+    
     else   // 默认 9600
     {
         TH1 = 0xFD;
@@ -51,79 +46,65 @@ void UART_Init(unsigned int baud)
     }
 
     TR1 = 1;            // 启动定时器1
-    ES  = 1;            // 开启串口中断（接收用）
+    ES  = 1;            // 开启串口中断
     EA  = 1;            // 总中断允许
 }
 
-/**
- * @brief 查询方式发送单字节
- */
+//查询方式发送单字节
 void UART_SendByte(unsigned char dat)
 {
-    SBUF = dat;
-    while (!TI);
+    SBUF = dat;//数据写入寄存器
+    while (!TI);//中断标志
     TI = 0;
 }
 
-/**
- * @brief 发送字符串（以 '\0' 结尾）
- */
+//发送字符串（以 '\0' 结尾）
 void UART_SendString(char *str)
 {
-    while (*str)
+    while (*str)//循环一次自动往后一位
     {
         UART_SendByte(*str++);
     }
 }
 
-/**
- * @brief printf 重定向底层函数
- *        自动将 '\n' 转换为 '\r\n'，兼容大多数终端与 VOFA+
- */
+// printf 重定向底层函数
 char putchar(char c)
 {
     UART_SendByte(c); 
     return c;
 }
 
-/**
- * @brief 指令解析函数：检测并执行上位机下发的指令
- */
+//检测并执行上位机下发的指令
 static void CMD_Parse(unsigned char *cmd)
 {
-    if (strncmp(cmd, "Value=", 6) == 0)
+    if (strncmp(cmd, "Value=", 6) == 0)//strncmp检查字符是否相同，同则return 0
     {
-        Value = atoi(cmd + 6);
-        ackRequired = 1;   // 使用标志位由主循环发送确认
+        Value = atoi(cmd + 6);//atoi字符串转整形
+				ackRequired = 1;
     }
     else if (strncmp(cmd, "Freq=", 5) == 0)
     {
         Freq = atoi(cmd + 5);
-				waveUpdateReq = 1;
-				ackRequired = 1;
+				waveUpdateReq = 1;// 使用标志位由主循环发送确认
     }
     else if (strncmp(cmd, "Duty=", 5) == 0)
     {
         Duty = atoi(cmd + 5);
 				waveUpdateReq = 1;
-        ackRequired = 1;
     }
 }
 
-/**
- * @brief 串口中断服务函数
- *        每收到一个字符存入缓冲区，遇换行符('\n')则进行命令解析
- */
+//串口中断服务函数
 void UART_ISR(void) interrupt 4
 {
     unsigned char ch;
-    if (RI)                     // 接收中断
+    if (RI)                     // RI中断标志
     {
         RI = 0;
-        ch = SBUF;
+        ch = SBUF;						 //接收串口寄存器数据
         if (ch == '\n')        // 以换行符作为指令结束
         {
-            recv_buf[recv_idx] = '\0';
+            recv_buf[recv_idx] = '\0';//把\n结束符换成\0
             recv_idx = 0;
             CMD_Parse(recv_buf);
         }

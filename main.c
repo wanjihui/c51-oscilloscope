@@ -5,9 +5,9 @@
 #include <stdio.h>
 
 extern bit ackRequired;     // 引用 uart.c 中的标志位
-extern bit waveUpdateReq;//引用标志位
+extern bit waveUpdateReq;		//引用标志位
 
-void Delay_ms(unsigned int ms)   // 如果使用定时器0，Delay 可能需要调整，此处保留不影响
+void Delay_ms(unsigned int ms)   //ms延时
 {
     unsigned int i, j;
     for (i = ms; i > 0; i--)
@@ -20,7 +20,6 @@ void main()
 
     UART_Init(BAUD_9600);
     Wave_Init();            // 启动方波输出
-    UART_SendString("System Ready. Wave on P1.4\r\n");
 
     while (1)
     {
@@ -34,10 +33,11 @@ void main()
 				
         if (ackRequired)
         {
-            UART_SendString("OK\n");
+						printf("%u\n", Value);     
+						// 发送 Value 的数值 + 换行，FireWater会把它当作一个数据点
             ackRequired = 0;
         }
 
-        Delay_ms(100);      // 采样率约10Hz
+        Delay_ms(5);      // 采样率约200Hz
     }
 }

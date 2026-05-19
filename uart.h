@@ -6,8 +6,6 @@
 // 支持的波特率宏（11.0592MHz 下的配置）
 #define BAUD_9600   9600
 #define BAUD_19200  19200
-// 如需 115200 请启用定时器2，这里仅提供 57600 示例
-#define BAUD_57600  57600
 
 void UART_Init(unsigned int baud);
 void UART_SendByte(unsigned char dat);
