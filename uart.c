@@ -105,7 +105,7 @@ static void CMD_Parse(unsigned char *cmd)
     else if (strncmp(cmd, "Duty=", 5) == 0)
     {
         Duty = atoi(cmd + 5);
-        Wave_Update();
+				waveUpdateReq = 1;
         ackRequired = 1;
     }
 }
