@@ -1,0 +1,22 @@
+# Keil 编译输出
+Objects/
+Listings/
+*.uvgui.*
+*.uvopt
+*.uvproj
+*.bak
+*.dep
+*.crf
+*.d
+*.o
+*.obj
+*.htm
+*.lnp
+*.plg
+*.hex
+*.axf
+*.sct
+*.map
+*.build_log.htm
+JLinkLog.txt
+*.Administrator
